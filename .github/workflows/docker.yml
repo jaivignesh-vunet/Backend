@@ -1,0 +1,24 @@
+name: Build Docker Image
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up environment variables
+      run: |
+        current_date=$(date +%Y%m%d)
+        current_time=$(date +%H%M%S)
+        echo "IMAGE_TAG=${current_date}-${current_time}" >> $GITHUB_ENV
+    - name: Build the Docker image
+      run: |
+        docker login ghcr.io -u jaivignesh-vunet -p ${{ secrets.KUBE }}
+        docker build . --file Dockerfile --tag ghcr.io/jaivignesh-vunet/backend:${{ env.IMAGE_TAG }}
+        docker push ghcr.io/jaivignesh-vunet/backend:${{ env.IMAGE_TAG }}
